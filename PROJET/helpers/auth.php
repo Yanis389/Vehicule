@@ -1,62 +1,75 @@
 <?php
 session_start();  // Démarrer la session si ce n'est pas déjà fait
 
-// Fonction pour vérifier si l'utilisateur est connecté
-function isLoggedIn() {
-    return isset($_SESSION['user']) && $_SESSION['user'] !== null;
-}
+class Auth {
+    private $pdo;
 
-// Fonction pour se connecter
-function login($pdo, $login, $password) {
-    // Instancier un objet User
-    $user = new User($pdo);  // Assurez-vous de passer le PDO si nécessaire pour les méthodes
-    $userDetails = $user->getByLogin($login);  // Recherche l'utilisateur dans la base de données
-
-    if ($userDetails && password_verify($password, $userDetails['password'])) {
-        // Si les mots de passe correspondent, sauvegarde les informations de l'utilisateur en session
-        $_SESSION['user'] = serialize($userDetails);  
-        return true;
-    }
-    return false;  // Si les informations ne correspondent pas
-}
-
-// Fonction pour s'inscrire
-function register($pdo, $prenom, $login, $password, $role = 'CLIENT') {
-    // Instancier un objet User
-    $user = new User($pdo);  // Assurez-vous de passer le PDO si nécessaire pour les méthodes
-
-    // Vérifie si le login existe déjà
-    $existingUser = $user->getByLogin($login);
-    if ($existingUser) {
-        return 'Le login est déjà utilisé.';
+    // Constructeur pour initialiser le PDO
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
     }
 
-    // Crée un nouvel utilisateur
-    $data = [
-        'prenom' => $prenom,
-        'login' => $login,
-        'password' => password_hash($password, PASSWORD_DEFAULT),
-        'role' => $role
-    ];
-
-    // Ajoute l'utilisateur dans la base de données
-    $result = $user->add($data);
-    if ($result) {
-        return 'Inscription réussie.';
-    } else {
-        return 'Erreur lors de l\'inscription.';
+    // Vérifie si l'utilisateur est connecté
+    public function isLoggedIn() {
+        return isset($_SESSION['user']) && $_SESSION['user'] !== null;
     }
-}
 
-// Fonction pour se déconnecter
-function logout() {
-    session_destroy();  // Détruire la session de l'utilisateur
-    header("Location: index.php");  // Redirige vers la page d'accueil
-    exit();
-}
+    // Connecte l'utilisateur
+    public function login($login, $password) {
+        // Instancier un objet User
+        $user = new User($this->pdo);  // Assurez-vous que la classe User accepte $pdo
+        $userDetails = $user->getByLogin($login);  // Recherche l'utilisateur dans la base
 
-// Fonction pour récupérer l'utilisateur actuellement connecté
-function getCurrentUser() {
-    return isset($_SESSION['user']) ? unserialize($_SESSION['user']) : null;
+        if ($userDetails && password_verify($password, $userDetails->getPassword())) {
+            // Si les mots de passe correspondent, sauvegarde l'utilisateur en session
+            $_SESSION['user'] = serialize($userDetails);  
+            return true;
+        }
+
+        return false;  // Si le login ou le mot de passe est incorrect
+    }
+
+    // Inscrit un nouvel utilisateur
+    public function register($prenom, $login, $password, $role = 'CLIENT') {
+        $user = new User($this->pdo);  // Instancier un objet User
+
+        // Vérifie si le login existe déjà
+        $existingUser = $user->getByLogin($login);
+        if ($existingUser) {
+            return 'Le login est déjà utilisé.';
+        }
+
+        // Prépare les données pour l'insertion
+        $data = [
+            'civilite' => null,  // Ou une valeur par défaut
+            'prenom' => $prenom,
+            'nom' => null,  // Ou une valeur par défaut
+            'login' => $login,
+            'email' => null,  // Ou une valeur par défaut
+            'role' => $role,
+            'tel' => null,  // Ou une valeur par défaut
+            'mdp' => password_hash($password, PASSWORD_DEFAULT)
+        ];
+
+        // Ajoute l'utilisateur dans la base
+        $result = $user->add($data);
+        if ($result) {
+            return 'Inscription réussie.';
+        } else {
+            return 'Erreur lors de l\'inscription.';
+        }
+    }
+
+    // Déconnecte l'utilisateur
+    public function logout() {
+        session_destroy();  // Détruit la session
+        header("Location: index.php");  // Redirige vers la page d'accueil
+        exit();
+    }
+
+    // Récupère l'utilisateur actuellement connecté
+    public function getCurrentUser() {
+        return isset($_SESSION['user']) ? unserialize($_SESSION['user']) : null;
+    }
 }
 ?>
