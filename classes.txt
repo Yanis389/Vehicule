@@ -1,0 +1,45 @@
+project-root/
+|-- config/
+|   |-- database.php          // Configuration de la base de données
+|
+|-- public/
+|   |-- index.php             // Page d'entrée principale
+|   |-- header.php            // En-tête commun des pages
+|   |-- footer.php            // Pied de page commun
+|   |-- assets/               // Répertoire pour les fichiers CSS, JS, images
+|
+|-- views/
+|   |-- vehicules/
+|   |   |-- list.php          // Page de liste des véhicules
+|   |   |-- add.php           // Page d'ajout de véhicule
+|   |   |-- edit.php          // Page de modification de véhicule
+|   |-- reservations/
+|   |   |-- create.php        // Page de création de réservation
+|   |   |-- list.php          // Page de liste des réservations
+|   |-- users/
+|   |   |-- login.php         // Page de connexion
+|   |   |-- register.php      // Page d'inscription
+|   |   |-- profile.php       // Page de profil utilisateur
+|
+|-- controllers/
+|   |-- VehiculeController.php // Contrôleur pour les véhicules
+|   |-- ReservationController.php // Contrôleur pour les réservations
+|   |-- UserController.php       // Contrôleur pour les utilisateurs
+|
+|-- models/
+|   |-- Vehicule.php           // Modèle pour les véhicules
+|   |-- Reservation.php        // Modèle pour les réservations
+|   |-- User.php               // Modèle pour les utilisateurs
+|
+|-- helpers/
+|   |-- validation.php         // Fonctions de validation des données
+|   |-- auth.php               // Fonctions d'authentification
+|
+|-- js/
+|   |-- form-validation.js     // Script de validation de formulaire côté client
+|
+|-- css/
+|   |-- style.css              // Fichier de style principal
+|
+|-- sql/
+|   |-- schema.sql             // Script SQL pour la création de la base de données

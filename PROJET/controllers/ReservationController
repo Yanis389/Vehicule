@@ -1,0 +1,73 @@
+<?php
+
+class ReservationController
+{
+    // Liste des réservations
+    public function listReservations()
+    {
+        // Récupérer toutes les réservations via le modèle
+        $reservation = new Reservation();
+        $reservations = $reservation->getAll(); // Récupère toutes les réservations de la base
+
+        // Afficher la vue des réservations
+        include './views/reservations/list.php';  // Vue des réservations
+    }
+
+    // Créer une réservation
+    public function createReservation()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $vehiculeId = $_POST['vehicule_id'];
+            $dateDebut = $_POST['date_debut'];
+            $dateFin = $_POST['date_fin'];
+
+            // Validation des dates
+            if ($dateDebut >= $dateFin) {
+                die('La date de fin doit être après la date de début.');
+            }
+
+            // Calcul du prix total simplifié pour l'exemple
+            $prixTotal = 100;  // A améliorer en fonction des dates et des tarifs
+
+            // ID de l'utilisateur connecté
+            $userId = $_SESSION['user_id'];
+
+            // Préparer les données pour la réservation
+            $data = [
+                'idVehicule' => $vehiculeId,
+                'idUser' => $userId,
+                'dateDebut' => $dateDebut,
+                'dateFin' => $dateFin,
+                'prixTotal' => $prixTotal,
+            ];
+
+            // Créer une nouvelle réservation
+            $reservation = new Reservation();
+            $reservation->add($data);
+
+            // Mettre à jour la disponibilité du véhicule
+            $vehiculeController = new VehiculeController();
+            $vehiculeController->updateVehiculeAvailability($vehiculeId, 0);  // Mettre à jour le véhicule comme réservé
+
+            // Redirection vers la liste des réservations
+            header('Location: /reservations');
+            exit;
+        }
+
+        // Afficher le formulaire de réservation
+        include './views/reservations/create.php';  // Formulaire de création
+    }
+
+    // Annuler une réservation
+    public function cancelReservation($id)
+    {
+        // Récupérer la réservation et la supprimer
+        $reservation = new Reservation();
+        $reservation->delete($id);
+
+        // Redirection vers la liste des réservations
+        header('Location: /reservations');
+        exit;
+    }
+}
+?>
